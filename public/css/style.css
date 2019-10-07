@@ -1,0 +1,149 @@
+﻿/* 
+* style.css
+* Example style for example pages.
+*/
+
+/**
+    body:
+*/
+body {
+    background-color: @light-grey3;
+    color: @darker-grey;
+    font-family: 'Roboto', sans-serif;
+    font-size: @normal-text;
+}
+
+
+/**
+    #header:
+*/
+#header {
+    #back-button {
+        margin: 9px 0;
+        font-size: 19px;
+    }
+
+    .logo {
+        h1 {
+            margin: 9px 0;
+            color: @white-off;
+        }
+    }
+}
+
+/**
+    main:
+*/
+main {
+    background-color: @light-grey;
+}
+
+.btn {
+    text-transform: uppercase;
+    padding: @quarter-margin @margin;
+    margin: @margin @half-margin;
+    text-decoration: none;
+    font-size: @small-text;
+    color: @dark-blue;
+    font-weight: @bold;
+    border: none;
+    background: none;
+    -moz-border-radius: @border-radius;
+    -webkit-border-radius: @border-radius;
+    border-radius: @border-radius;
+    -khtml-border-radius: @border-radius;
+    box-shadow: none;
+
+    &:hover {
+        cursor: pointer;
+        text-decoration: none;
+        color: @white;
+        background: @light-grey3;
+        border: none;
+        box-shadow: none;
+    }
+
+    &:active, &:focus, &.active:focus {
+        color: @white;
+        background: @light-grey4;
+        border: none;
+        box-shadow: none;
+    }
+}
+
+.btn-primary {
+    .btn();
+
+    &:active, &:focus,
+    &:not(:disabled):not(.disabled).active,
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled):active:focus,
+    &:not(:disabled):not(.disabled).active:focus,
+    .show > .btn-secondary.dropdown-toggle,
+    .show > .btn-secondary.dropdown-toggle:focus {
+        color: @darker-blue;
+        background: @light-grey4;
+        border: none;
+        box-shadow: none;
+    }
+}
+
+/**
+    .btn-secondary:
+    Bootstrap does a lot to btn-secondary! The pile of mess below stops Bootstrap from showing silly borders around buttons on-press.
+*/
+.btn-secondary {
+    color: @darker-grey;
+
+    &:hover {
+        color: @darker-grey;
+        background: @light-grey3;
+        border: none;
+        box-shadow: none;
+    }
+
+    &:active, &:focus,
+    &:not(:disabled):not(.disabled).active,
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled):active:focus,
+    &:not(:disabled):not(.disabled).active:focus,
+    .show > .btn-secondary.dropdown-toggle,
+    .show > .btn-secondary.dropdown-toggle:focus {
+        color: @darkest-grey;
+        background: @light-grey4;
+        border: none;
+        box-shadow: none;
+    }
+}
+
+.btn-bar-grey {
+    background-color: @light-grey2;
+}
+
+.modal {
+    border-radius: 3px;
+
+    .modal-content {
+        border: none;
+        background-color: @light-grey;
+        -moz-border-radius: @border-radius;
+        -webkit-border-radius: @border-radius;
+        border-radius: @border-radius;
+        -khtml-border-radius: @border-radius;
+
+        .modal-header {
+            border: none;
+            border-radius: 0px;
+            padding: @margin;
+
+            h5 {
+                font-weight: @bold;
+            }
+        }
+
+        .modal-footer {
+            border: none;
+            padding: @margin;
+        }
+    }
+}

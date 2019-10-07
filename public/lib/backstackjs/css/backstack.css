@@ -1,0 +1,97 @@
+﻿/* 
+* backstack.css
+* Holds styles for mobile-like user interface.
+*/
+
+/**
+    body:
+    Allows for flex space-filling to occur by its child views.
+    'height: 100vh' is used to force height to 100% of the view port.
+*/
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/**
+    #header:
+    Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
+*/
+#header {
+    flex-grow: 0;
+}
+
+/**
+    main:
+    'flex: 1' denotes 'flex-grow: 1', meaning 'main' will fill available space between #header and #footer.
+    We also enable flex for its children so that a child with 'flex-grow: 1' can fill available space within 'main'.
+    'min-height: 0px' is required for Firefox/other webkit browsers
+        - flex children (e.g. .scrollable) were not becoming scrollable when overflowing
+        - "It turns out that there was a feature in the flexbox specification that added an implied minimum size for flex items. This feature was removed and then re-added back into the spec at some point."
+        - See https://moduscreate.com/blog/how-to-fix-overflow-issues-in-css-flex-layouts/
+*/
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0px;
+}
+
+/**
+    .has-scrollable-child:
+    Forms can surround a scrollable AND a button bar. This is so the button in button bar can be the submit button without extra Javascript.
+    'flex: 1' is used to fill the space in 'main'. If I remove this, this still works in Firefox but not Chrome, so I have left it in.
+    '.has-scrollable-child' needs to be its own flex container and allow '.scrollable' child to fill the space with its 'flex: 1'.
+    'min-height: 0px' is here for the same reason as 'main'
+*/
+.has-scrollable-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0px;
+    margin-bottom: 0px;
+}
+
+/**
+    .scrollable:
+    Fills up available space - requires 'display: flex' and 'flex-direction: column' by parent.
+    Becomes scrollable when filled with content .
+*/
+.scrollable {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/**
+    .footer:
+    Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
+*/
+.footer {
+    flex: 0;
+}
+
+/**
+    .btn-tab:
+    Button fills available space using 'flex: 1'.
+*/
+.btn-tab {
+    .btn-secondary();
+    flex: 1;
+    padding: @half-margin 0px;
+    margin: 0;
+    color: white;
+    font-weight: normal;
+}
+
+.btn-tab-selected {
+    color: @darkest-grey;
+    background: @light-grey4;
+    border: none;
+    box-shadow: none;
+}
+
+.btn-bar {
+    padding: @margin 0;
+}
