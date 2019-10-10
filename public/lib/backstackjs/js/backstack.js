@@ -227,9 +227,9 @@ class Screen {
     */
     setBackVisibilityOverride(isVisible) {
         if (isVisible) {
-            $(this.backTerm).show();
+            $(this.backTerm).css('visibility', 'visible');
         } else {
-            $(this.backTerm).hide();
+            $(this.backTerm).css('visibility', 'hidden');
         }
     }
 
