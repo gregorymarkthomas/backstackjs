@@ -62,8 +62,8 @@ class Screen {
         $.get(this.url, function (htmlCode) {
             this.forceRefreshOnLoad = false;
             self.htmlCode = htmlCode;                
-            self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
             onGetHTML(htmlCode, self.url);
+            self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
         });
     }
 
@@ -91,12 +91,12 @@ class Screen {
             $.get(this.url, function (htmlCode) {
                 this.forceRefreshOnLoad = false;
                 self.htmlCode = htmlCode;
-                self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
                 onGetHTML(htmlCode, self.url);
+                self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
             });
         } else {
-            this.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
             onGetHTML(this.htmlCode, this.url);
+            this.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
         }
     }
 
