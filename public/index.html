@@ -41,10 +41,6 @@
                         <i class="fa @ViewBag.IconClass fa-2x text-dark"></i>
                         <div>Tab 3</div>
                     </button>
-                    <button id="tab-page-four" class="btn-tab" title="Tab 4">
-                        <i class="fa @ViewBag.IconClass fa-2x text-dark"></i>
-                        <div>Tab 4</div>
-                    </button>
                 </div>
             </div>
         </footer>
@@ -83,10 +79,7 @@
             ], "tab-page-two"),
             new Tab([
                 new Screen("3-1.html")
-            ], "tab-page-three"),
-            new Tab([
-                new Screen("4-1.html")
-            ], "tab-page-four")
+            ], "tab-page-three")
         ], "main", "tab-page-one", 500, onViewUpdated);
     </script>
 </html>
