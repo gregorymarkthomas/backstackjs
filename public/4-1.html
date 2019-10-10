@@ -1,0 +1,18 @@
+<div class="center">
+	<p>
+		This is screen 4.1. Pressing Refresh will do a tab refresh (and not a browser refresh).
+	</p>
+	<p id="timer">
+		0 seconds
+		<!-- dynamic content -->
+	</p>
+	<p class="large-text">
+		<a href="" class="bs-override-refresh btn">Refresh</a>
+	</p>
+</div>
+<script type="text/javascript">
+	var start = new Date;
+	setInterval(function() {
+	    $('#timer').text(Math.round((new Date - start) / 1000, 0) + " seconds"); 
+	}, 1000);	
+</script>
