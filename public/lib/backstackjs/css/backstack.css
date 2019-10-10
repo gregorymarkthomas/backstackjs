@@ -15,10 +15,10 @@ body {
 }
 
 /**
-    #header:
+    nav:
     Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
 */
-#header {
+nav {
     flex-grow: 0;
 }
 
@@ -36,6 +36,14 @@ main {
     display: flex;
     flex-direction: column;
     min-height: 0px;
+}
+
+/**
+    .footer:
+    Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
+*/
+footer {
+    flex: 0;
 }
 
 /**
@@ -65,33 +73,50 @@ main {
 }
 
 /**
-    .footer:
-    Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
-*/
-.footer {
-    flex: 0;
-}
-
-/**
     .btn-tab:
     Button fills available space using 'flex: 1'.
 */
 .btn-tab {
-    .btn-secondary();
     flex: 1;
-    padding: @half-margin 0px;
+    text-transform: uppercase;
+    padding: 16px;
     margin: 0;
-    color: white;
-    font-weight: normal;
+    text-decoration: none;
+    font-size: 12px;
+    color: #777;
+    font-weight: 600;
+    border: none;
+    background: none;
+    -moz-border-radius: 1.5px;
+    -webkit-border-radius: 1.5px;
+    border-radius: 1.5px;
+    -khtml-border-radius: 1.5px;
+    box-shadow: none;    
 }
 
-.btn-tab-selected {
-    color: @darkest-grey;
-    background: @light-grey4;
+.btn-tab:hover {
+    cursor: pointer;
+    text-decoration: none;
+    color: #fefefe;
+    background: #aaa;
     border: none;
     box-shadow: none;
 }
 
-.btn-bar {
-    padding: @margin 0;
+.btn-tab:active, .btn-tab:focus {
+    color: #fefefe;
+    background: #bbb;
+    border: none;
+    box-shadow: none;
+}
+
+.btn-tab-selected {
+    color: #444;
+    background: #aaa;
+    border: none;
+    box-shadow: none;
+}
+
+.d-flex {
+    display: flex;
 }

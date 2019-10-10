@@ -3,147 +3,53 @@
 * Example style for example pages.
 */
 
-/**
-    body:
-*/
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+.container-fluid {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
 body {
-    background-color: @light-grey3;
-    color: @darker-grey;
-    font-family: 'Roboto', sans-serif;
-    font-size: @normal-text;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    background: #efefef;
 }
 
-
-/**
-    #header:
-*/
-#header {
-    #back-button {
-        margin: 9px 0;
-        font-size: 19px;
-    }
-
-    .logo {
-        h1 {
-            margin: 9px 0;
-            color: @white-off;
-        }
-    }
-}
-
-/**
-    main:
-*/
-main {
-    background-color: @light-grey;
-}
-
-.btn {
-    text-transform: uppercase;
-    padding: @quarter-margin @margin;
-    margin: @margin @half-margin;
-    text-decoration: none;
-    font-size: @small-text;
-    color: @dark-blue;
-    font-weight: @bold;
-    border: none;
-    background: none;
-    -moz-border-radius: @border-radius;
-    -webkit-border-radius: @border-radius;
-    border-radius: @border-radius;
-    -khtml-border-radius: @border-radius;
-    box-shadow: none;
-
-    &:hover {
-        cursor: pointer;
-        text-decoration: none;
-        color: @white;
-        background: @light-grey3;
-        border: none;
-        box-shadow: none;
-    }
-
-    &:active, &:focus, &.active:focus {
-        color: @white;
-        background: @light-grey4;
-        border: none;
-        box-shadow: none;
-    }
-}
-
-.btn-primary {
-    .btn();
-
-    &:active, &:focus,
-    &:not(:disabled):not(.disabled).active,
-    &:not(:disabled):not(.disabled):active,
-    &:not(:disabled):not(.disabled):active:focus,
-    &:not(:disabled):not(.disabled).active:focus,
-    .show > .btn-secondary.dropdown-toggle,
-    .show > .btn-secondary.dropdown-toggle:focus {
-        color: @darker-blue;
-        background: @light-grey4;
-        border: none;
-        box-shadow: none;
-    }
-}
-
-/**
-    .btn-secondary:
-    Bootstrap does a lot to btn-secondary! The pile of mess below stops Bootstrap from showing silly borders around buttons on-press.
-*/
-.btn-secondary {
-    color: @darker-grey;
-
-    &:hover {
-        color: @darker-grey;
-        background: @light-grey3;
-        border: none;
-        box-shadow: none;
-    }
-
-    &:active, &:focus,
-    &:not(:disabled):not(.disabled).active,
-    &:not(:disabled):not(.disabled):active,
-    &:not(:disabled):not(.disabled):active:focus,
-    &:not(:disabled):not(.disabled).active:focus,
-    .show > .btn-secondary.dropdown-toggle,
-    .show > .btn-secondary.dropdown-toggle:focus {
-        color: @darkest-grey;
-        background: @light-grey4;
-        border: none;
-        box-shadow: none;
-    }
-}
-
-.btn-bar-grey {
-    background-color: @light-grey2;
-}
-
-.modal {
-    border-radius: 3px;
-
-    .modal-content {
-        border: none;
-        background-color: @light-grey;
-        -moz-border-radius: @border-radius;
-        -webkit-border-radius: @border-radius;
-        border-radius: @border-radius;
-        -khtml-border-radius: @border-radius;
-
-        .modal-header {
-            border: none;
-            border-radius: 0px;
-            padding: @margin;
-
-            h5 {
-                font-weight: @bold;
-            }
-        }
-
-        .modal-footer {
-            border: none;
-            padding: @margin;
-        }
-    }
+nav {
+    padding: 16px;
+    background: #24577c;
+    color: #fefefe;
 }
