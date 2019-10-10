@@ -14,6 +14,15 @@ nav {
     color: #fefefe;
 }
 
+nav button {
+    color: #fefefe;
+    font-size: 16px;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
 .large-text {
     font-size: 30px;
 }
