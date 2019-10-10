@@ -306,12 +306,28 @@ class Backstack {
     /**
      * pop():
      * Removes a Screen from the top of the stack.
-     * 
+     * This will always leave a screen left in the stack, and should be used the majority of the time.
      * Returns true if there is a Screen to pop from the backstack.
      */
     pop() {
         var success = false;
         if (this.screens.length > 1) {
+            success = (this.screens.pop() ? true : false);
+        }
+        return success;
+    }
+
+    /**
+     * popForced():
+     * Removes a Screen from the top of the stack.
+     * This version will pop and is able to remove the one and only screen (unlike pop()).
+     * This should be used with care.
+     * 
+     * Returns true if there is a Screen to pop from the backstack.
+     */
+    popForced() {
+        var success = false;
+        if (this.screens.length >= 1) {
             success = (this.screens.pop() ? true : false);
         }
         return success;
@@ -426,12 +442,14 @@ class Tab {
     * onGoAndClear():
     * The user is going 'sideways' to another page (i.e. they want to go to another page and they don't want an opportunity to come back).
     * We need to pop the current page from the backstack and push the new page onto the backstack.
+    * backstack.popForced() is used only here so that if a Go + Clear button is used when there is only 1 screen, we want to pop the last screen.
+    * Normal pop() will always leave one screen left, but popForced() can leave zero screens left.
     * 
     * @param {string} url - URL of the page to GO to.
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
     onGoAndClear(url, onGetHTML) {
-        this.backstack.pop();
+        this.backstack.popForced();
         this.backstack.push(new Screen(url));
         this.getHtml(onGetHTML);
     }
