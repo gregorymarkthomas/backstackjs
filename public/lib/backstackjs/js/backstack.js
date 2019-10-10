@@ -106,12 +106,6 @@ class Screen {
      * We hijack links and submits. When they are pressed, we callback to the caller to notify it.
      * We reapply this for every Screen that is being used.
      * 
-     * Notes:
-     *  - This is (wrongly) tied to Vue in that our overrides are themselves overridden when Core.js (Vue) is mounted.
-     *      - So, in Core.js we send out a 'vue-loaded' trigger when mounted.
-     *      - We set our overrides AFTER Core.js has mounted.
-     *      - Ideally this should not be here, but we are tied to Vue.
-     *      
      * @param {boolean} isBackVisible - true if all Back buttons are visible (i.e. if there is a Screen to go back to).
      * @param {function} onGetHTML - notifies caller when HTML has been generated for this Screen.
      * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
@@ -123,13 +117,11 @@ class Screen {
     setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
         var self = this;
         self.setBackVisibilityOverride(isBackVisible); 
-        $(document).on('vue-loaded', function () {
-            self.setGoOverride(onGo);
-            self.setBackOverride(onBack);
-            self.setGoAndClearOverride(onGoAndClear);
-            self.setSubmitOverride(onSubmit);
-            self.setRefreshOverride(onRefresh);                       
-        });
+        self.setGoOverride(onGo);
+        self.setBackOverride(onBack);
+        self.setGoAndClearOverride(onGoAndClear);
+        self.setSubmitOverride(onSubmit);
+        self.setRefreshOverride(onRefresh);                       
     }
 
     /**
@@ -242,16 +234,6 @@ class Screen {
     }
 
     /**
-     * clearVueMountTrigger():
-     * Removes document-wide 'Vue-loaded' listener - it's used to apply event listeners once Core.js has mounted.
-     * We need this so that if there is more than one screen in the backstack, only the current Screen will repond to the 'vue-loaded' trigger.
-     * This previously caused an issue where all Screens in the backstack were triggering their onGo/onBack buttons and adding/removing multiple Screens.
-     */
-    clearVueMountTrigger() {
-        $(document).off('vue-loaded');
-    }
-
-    /**
      * clearGoOverride():
      * Removes onClick listener.
      */
@@ -297,7 +279,6 @@ class Screen {
      * This is to ensure double-clicks and stale listeners do not hang around and cause issues.
      */
     destroy() {
-        this.clearVueMountTrigger();
         this.clearGoOverride();
         this.clearBackOverride();
         this.clearGoAndClearOverride();
@@ -457,7 +438,6 @@ class Tab {
 
     /**
     * onSubmit():
-    * This is not currently in use - for forms in Vue we are relying on Vue to update the view instead of backstack.js.
     *
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
