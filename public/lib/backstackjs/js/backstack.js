@@ -41,7 +41,7 @@ class Screen {
     }
 
     /**
-     * initialise():
+     * initialiseIgnoreCache():
      * Returns the HTML of the page this Screen represents by doing an AJAX GET.
      * This is done using a callback due to the asynchronous nature of GET-ing the HTML for the URL.
      * We also set the Screen onClick listeners here - whoever initialises the screen is told when Go, Back and Go+Clear buttons are pressed.
@@ -68,7 +68,7 @@ class Screen {
     }
 
     /**
-     * initialiseOld():
+     * initialise():
      * Returns the HTML of the page this Screen represents by doing an AJAX GET.
      * This is done using a callback due to the asynchronous nature of GET-ing the HTML for the URL.
      * We also set the Screen onClick listeners here - whoever initialises the screen is told when Go, Back and Go+Clear buttons are pressed.
@@ -186,13 +186,15 @@ class Screen {
      * We still callback to Tab to notify it that a submission has occurred.
      * We DO NOT destroy().
      * 
-     * @param {function} callback - notifies caller button has been pressed. This has been disabled for now as it is currently not required.
+     * serializeArray() will serialise both GET and POST data into an array.
+     * 
+     * @param {function} callback - notifies caller button has been pressed.
     */
     setSubmitOverride(callback) {
         var self = this;
         $(this.submitTerm).submit(function (e) {
             self.forceRefreshOnLoad = true;
-            callback();
+            callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray());
             return false;
         });
     }
@@ -400,10 +402,28 @@ class Tab {
             self.onBack(onGetHTML);
         }, function (url) {
             self.onGoAndClear(url, onGetHTML);
-        }, function () {
-            self.onSubmit(onGetHTML);
+        }, function (action, method, data) {
+            self.onSubmit(action, method, data, onGetHTML);
         }, function () {
             self.onRefresh(onGetHTML);
+        });
+    }
+
+    submitForm(action, method, data, onSuccess, onError) {
+        $.ajax({
+            url: action,
+            data: data,
+            processData: false,
+            contentType: false,
+            type: method.toUpperCase(),
+            success: function(data) {
+                alert(data);
+                onSuccess();
+            },
+            error: function(data) {
+                alert(data);
+                onError();
+            }
         });
     }
 
@@ -459,8 +479,8 @@ class Tab {
     *
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
-    onSubmit(onGetHTML) {
-        /** Do nothing **/
+    onSubmit(action, method, data, onSuccess, onError) {
+        this.submitForm(action, method, data, onSuccess, onError);
     }
 
     /**
