@@ -107,7 +107,6 @@ class Screen {
      * We reapply this for every Screen that is being used.
      * 
      * @param {boolean} isBackVisible - true if all Back buttons are visible (i.e. if there is a Screen to go back to).
-     * @param {function} onGetHTML - notifies caller when HTML has been generated for this Screen.
      * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
