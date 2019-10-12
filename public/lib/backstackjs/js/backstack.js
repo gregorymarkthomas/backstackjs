@@ -193,7 +193,9 @@ class Screen {
         var self = this;
         $(this.submitTerm).submit(function (e) {
             self.forceRefreshOnLoad = true;
-            callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray());
+            callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray(), function(data) {
+                console.log("setSubmitOverride(): onFailure: " + data.status + " " + data.statusText);
+            });
             return false;
         });
     }
@@ -401,8 +403,8 @@ class Tab {
             self.onBack(onGetHTML);
         }, function (url) {
             self.onGoAndClear(url, onGetHTML);
-        }, function (action, method, data) {
-            self.onSubmit(action, method, data, onGetHTML);
+        }, function (action, method, data, onFailure) {
+            self.onSubmit(action, method, data, onGetHTML, onFailure);
         }, function () {
             self.onRefresh(onGetHTML);
         });
@@ -416,12 +418,10 @@ class Tab {
             contentType: false,
             type: method.toUpperCase(),
             success: function(data) {
-                alert(data);
                 onSuccess();
             },
             error: function(data) {
-                alert(data);
-                onError();
+                onError(data);
             }
         });
     }
