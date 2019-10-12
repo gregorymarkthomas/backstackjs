@@ -413,11 +413,13 @@ class Tab {
     submitForm(action, method, data, onSuccess, onError) {
         $.ajax({
             url: action,
-            data: data,
-            processData: false,
-            contentType: false,
             type: method.toUpperCase(),
-            success: function(data) {
+            data: data,
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            // processData: false,
+            // contentType: false,
+            success: function(data, textStatus, jgXHR) {
                 onSuccess();
             },
             error: function(data) {
