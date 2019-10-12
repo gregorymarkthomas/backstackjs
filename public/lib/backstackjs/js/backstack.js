@@ -194,7 +194,7 @@ class Screen {
         $(this.submitTerm).submit(function (e) {
             self.forceRefreshOnLoad = true;
             callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray(), function(data) {
-                console.log("setSubmitOverride(): onFailure: " + data.status + " " + data.statusText);
+                console.error("setSubmitOverride(): onFailure: " + data.status + " " + data.statusText);
             });
             return false;
         });
