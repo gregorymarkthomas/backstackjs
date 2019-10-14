@@ -415,11 +415,9 @@ class Tab {
             url: action,
             type: method.toUpperCase(),
             data: data,
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
             // processData: false,
             // contentType: false,
-            success: function(data, textStatus, jgXHR) {
+            success: function(data) {
                 onSuccess();
             },
             error: function(data) {
