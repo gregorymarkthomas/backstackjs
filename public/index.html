@@ -62,11 +62,13 @@
         * #param tabViewId - ID of the Tab that has shown this HTML.
         * #param url - URL of the Screen.
         */
-        var onViewUpdated = function (tabViewId, url) {
-            console.log("onViewUpdated(): tabViewId = " + tabViewId + ", url = " + url);
+        var onSuccess = function (tabViewId, url) {
+            console.log("onSuccess(): tabViewId = " + tabViewId + ", url = " + url);
         };
 
-
+        var onError = function (tabViewId, url) {
+            console.log("onError(): tabViewId = " + tabViewId + ", url = " + url);
+        };
 
         /**
         * Create a JS TabBar object.
@@ -91,6 +93,6 @@
             new Tab([
                 new Screen("5-1.php")
             ], "tab-page-five")
-        ], "main", "tab-page-one", 500, onViewUpdated);
+        ], "main", "tab-page-one", 500, onSuccess, onError);
     </script>
 </html>

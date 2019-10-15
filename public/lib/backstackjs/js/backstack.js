@@ -62,10 +62,14 @@ class Screen {
         onSuccess, onError, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
         if(this.htmlCode == null || forceRefresh) {
             let self = this;
-            this.getHtml(this.url, method, data, onSuccess, onError, function(htmlCode) {
+            this.getHtml(this.url, method, data, function(htmlCode, url) {
                 self.htmlCode = htmlCode;
-                onSuccess(htmlCode, self.url);
+                // self.url vs url - different if getting url for form submission
+                onSuccess(htmlCode, url);
                 self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
+            }, function(data, url) {
+                console.error("Screen initialise(): onError: " + data.status + " " + data.statusText);
+                onError(data, url);
             });
         } else {
             onSuccess(this.htmlCode, this.url);
@@ -79,10 +83,10 @@ class Screen {
             type: method.toUpperCase(),
             data: data,
             success: function(data) {
-                onSuccess(htmlCode, onGetHTML);
+                onSuccess(data, action);
             },
             error: function(data) {
-                onError(data);
+                onError(data, action);
             }
         });
     }
@@ -180,9 +184,7 @@ class Screen {
         var self = this;
         $(this.submitTerm).submit(function (e) {
             self.destroy();
-            callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray(), function(data) {
-                console.error("setSubmitOverride(): onFailure: " + data.status + " " + data.statusText);
-            });
+            callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray());
             return false;
         });
     }  
@@ -371,7 +373,7 @@ class Tab {
         var self = this;
         $("#" + this.viewId).click(function () {
             preCreate();
-            self.setCurrentScreenHTML(true, onSuccess, onError);
+            self.setCurrentScreenHTML("GET", null, true, onSuccess, onError);
         })
     }
 
@@ -382,18 +384,18 @@ class Tab {
      * 
      * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
      */
-    setCurrentScreenHTML(forceRefresh, onSuccess, onError) {
+    setCurrentScreenHTML(method, data, forceRefresh, onSuccess, onError) {
         var self = this;        
-        this.backstack.getCurrent().initialise("GET", null, this.isHeaderBackVisible(), forceRefresh, onSuccess, onError, function (url) {
-            self.onGo(url, onGetHTML);
+        this.backstack.getCurrent().initialise(method, data, this.isHeaderBackVisible(), forceRefresh, onSuccess, onError, function (url) {
+            self.onGo(url, onSuccess, onError);
         }, function () {
-            self.onBack(onGetHTML);
+            self.onBack(onSuccess, onError);
         }, function (url) {
-            self.onGoAndClear(url, onGetHTML);
-        }, function (action, method, data, onFailure) {
-            self.onSubmit(action, method, data, onGetHTML, onFailure);
+            self.onGoAndClear(url, onSuccess, onError);
+        }, function (action, method, data) {
+            self.onSubmit(action, method, data, onSuccess, onError);
         }, function () {
-            self.onRefresh(onGetHTML);
+            self.onRefresh(onSuccess, onError);
         });
     }
 
@@ -407,7 +409,7 @@ class Tab {
     onGo(url, onSuccess, onError) {
         let self = this;
         if (this.backstack.push(new Screen(url))) {
-            self.setCurrentScreenHTML(true, onSuccess, onError);
+            self.setCurrentScreenHTML("GET", null, true, onSuccess, onError);
         } else {
             console.error("onGo(): could not push screen with url '" + url + "' to the backstack.");
         }
@@ -422,7 +424,7 @@ class Tab {
      */
     onBack(onSuccess, onError) {
         if (this.backstack.pop()) {
-            this.setCurrentScreenHTML(false, onSuccess, onError);
+            this.setCurrentScreenHTML("GET", null, false, onSuccess, onError);
         } else {
             /** Screen is the only one left in the backstack **/
             console.log("onBack(): did not pop Screen from backstack, though this could be because it's the last in stack. backstack length = " + this.backstack.screens.length);
@@ -451,18 +453,7 @@ class Tab {
     */
     onSubmit(action, method, data, onSuccess, onError) {
         if (this.backstack.push(new Screen(action))) {
-            var self = this;        
-            this.backstack.getCurrent().initialise(method, data, this.isHeaderBackVisible(), forceRefresh, onSuccess, onError, function (url) {
-                self.onGo(url, onGetHTML);
-            }, function () {
-                self.onBack(onGetHTML);
-            }, function (url) {
-                self.onGoAndClear(url, onGetHTML);
-            }, function (action, method, data, onFailure) {
-                self.onSubmit(action, method, data, onGetHTML, onFailure);
-            }, function () {
-                self.onRefresh(onGetHTML);
-            });
+            this.setCurrentScreenHTML(method, data, false, onSuccess, onError);
         } else {
             console.error("onSubmit(): could not push screen with url '" + url + "' to the backstack.");
         }
@@ -474,8 +465,8 @@ class Tab {
     *
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
-    onRefresh(onGetHTML) {
-        this.setCurrentScreenHTML(this.backstack.getCurrent().htmlCode, onGetHTML);
+    onRefresh(onSuccess, onError) {
+        this.setCurrentScreenHTML("GET", null, false, onSuccess, onError);
     }
 
     /**
@@ -517,7 +508,7 @@ class TabBar {
      * @param {string} transitionSpeed - speed that jQuery animation will operate at when Screens are changed.
      * @param {function} onViewUpdated - callback that is called when new HTML has been applied to view container.
      */
-    constructor(tabs, appViewId, selectedTabViewId, transitionSpeed, onViewUpdated) {
+    constructor(tabs, appViewId, selectedTabViewId, transitionSpeed, onSuccess, onError) {
         this.tabClassName = "btn-tab";
         this.tabSelectedClassName = "btn-tab-selected";
 
@@ -525,7 +516,7 @@ class TabBar {
         this.selectedTabViewId = selectedTabViewId;
         this.transitionSpeed = transitionSpeed;
 
-        this.setTabsClickListeners(appViewId, onViewUpdated);
+        this.setTabsClickListeners(appViewId, onSuccess, onError);
         this.clickTab(selectedTabViewId);
     }
 
@@ -539,7 +530,7 @@ class TabBar {
      * @param {string} appViewId - view ID of container that will show the Screen HTML.
      * @param {function} onViewUpdated - callback that is called when new HTML has been applied to view container.
      */
-    setTabsClickListeners(appViewId, onViewUpdated) {
+    setTabsClickListeners(appViewId, onSuccess, onError) {
         var self = this;
         this.tabs.forEach(function (tab) {
             $("#" + tab.viewId).click(function () {
@@ -552,10 +543,12 @@ class TabBar {
                     self.findTab(self.selectedTabViewId).destroy();
                     self.selectedTabViewId = tab.viewId;     
                 });                        
-            }, function (htmlCode, url) {                
+            }, function(htmlCode, url) {                
                 $(appViewId).html(htmlCode);
-                onViewUpdated(tab.viewId, url);
+                onSuccess(tab.viewId, url);
                 self.animateIn(appViewId, self.transitionSpeed);                
+            }, function(data, url) {
+                onError(tab.viewId, url);
             });
         });
     }
