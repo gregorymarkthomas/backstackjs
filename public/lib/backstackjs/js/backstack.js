@@ -384,18 +384,18 @@ class Tab {
         var self = this;
         $("#" + this.viewId).click(function () {
             preCreate();
-            self.getHtml(onGetHTML);
+            self.setCurrentScreenHTML(onGetHTML);
         })
     }
 
     /**
-     * getHtml():
+     * setCurrentScreenHTML():
      * Get the HTML from the current Screen and show in the view container.
      * Register callbacks from any backstack-related button clicks that occur on the current Screen.
      * 
      * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
      */
-    getHtml(onGetHTML) {
+    setCurrentScreenHTML(onGetHTML) {
         var self = this;        
         this.backstack.getCurrent().initialise(this.isHeaderBackVisible(), onGetHTML, function (url) {
             self.onGo(url, onGetHTML);
@@ -433,7 +433,7 @@ class Tab {
      */
     onGo(url, onGetHTML) {
         if (this.backstack.push(new Screen(url))) {
-            this.getHtml(onGetHTML);
+            this.setCurrentScreenHTML(onGetHTML);
         } else {
             console.error("onGo(): could not push screen with url '" + url + "' to the backstack.");
         }
@@ -448,7 +448,7 @@ class Tab {
      */
     onBack(onGetHTML) {
         if (this.backstack.pop()) {
-            this.getHtml(onGetHTML);
+            this.setCurrentScreenHTML(onGetHTML);
         } else {
             /** Screen is the only one left in the backstack **/
             console.log("onBack(): did not pop Screen from backstack, though this could be because it's the last in stack. backstack length = " + this.backstack.screens.length);
@@ -468,7 +468,7 @@ class Tab {
     onGoAndClear(url, onGetHTML) {
         this.backstack.popForced();
         this.backstack.push(new Screen(url));
-        this.getHtml(onGetHTML);
+        this.setCurrentScreenHTML(onGetHTML);
     }
 
     /**
@@ -491,7 +491,7 @@ class Tab {
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
     onRefresh(onGetHTML) {
-        this.getHtml(onGetHTML);
+        this.setCurrentScreenHTML(onGetHTML);
     }
 
     /**
