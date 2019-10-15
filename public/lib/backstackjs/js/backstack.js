@@ -41,33 +41,6 @@ class Screen {
     }
 
     /**
-     * initialiseIgnoreCache():
-     * Returns the HTML of the page this Screen represents by doing an AJAX GET.
-     * This is done using a callback due to the asynchronous nature of GET-ing the HTML for the URL.
-     * We also set the Screen onClick listeners here - whoever initialises the screen is told when Go, Back and Go+Clear buttons are pressed.
-     *
-     * We never get a cached version of the HTML - we do a .get every time.
-     * This is to get around the issue where scripts are reloaded.
-     *
-     * @param {boolean} isBackVisible - true if all Back buttons are visible (i.e. if there is a Screen to go back to).
-     * @param {function} onGetHTML - notifies caller when HTML has been generated for this Screen.
-     * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
-     * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
-     * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
-     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
-     * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
-     */
-    initialiseIgnoreCache(isBackVisible, onGetHTML, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
-        var self = this;
-        $.get(this.url, function (htmlCode) {
-            this.forceRefreshOnLoad = false;
-            self.htmlCode = htmlCode;                
-            onGetHTML(htmlCode, self.url);
-            self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
-        });
-    }
-
-    /**
      * initialise():
      * Returns the HTML of the page this Screen represents by doing an AJAX GET.
      * This is done using a callback due to the asynchronous nature of GET-ing the HTML for the URL.
@@ -85,19 +58,33 @@ class Screen {
      * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
      * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
      */
-    initialise(isBackVisible, onGetHTML, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
-        var self = this;
-        if (this.htmlCode == null || this.forceRefreshOnLoad) {
-            $.get(this.url, function (htmlCode) {
-                this.forceRefreshOnLoad = false;
+    initialise(method, data, isBackVisible, forceRefresh, 
+        onSuccess, onError, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
+        if(this.htmlCode == null || forceRefresh) {
+            let self = this;
+            this.getHtml(this.url, method, data, onSuccess, onError, function(htmlCode) {
                 self.htmlCode = htmlCode;
-                onGetHTML(htmlCode, self.url);
+                onSuccess(htmlCode, self.url);
                 self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
             });
         } else {
-            onGetHTML(this.htmlCode, this.url);
+            onSuccess(this.htmlCode, this.url);
             this.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
         }
+    }
+
+    getHtml(action, method, data, onSuccess, onError) {
+        $.ajax({
+            url: action,
+            type: method.toUpperCase(),
+            data: data,
+            success: function(data) {
+                onSuccess(htmlCode, onGetHTML);
+            },
+            error: function(data) {
+                onError(data);
+            }
+        });
     }
 
     /**
@@ -380,11 +367,11 @@ class Tab {
      * @param {function} preCreate - notifies caller that Screen is about to be created.
      * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
      */
-    onClick(preCreate, onGetHTML) {
+    onClick(preCreate, onSuccess, onError) {
         var self = this;
         $("#" + this.viewId).click(function () {
             preCreate();
-            self.setCurrentScreenHTML(onGetHTML);
+            self.setCurrentScreenHTML(true, onSuccess, onError);
         })
     }
 
@@ -395,9 +382,9 @@ class Tab {
      * 
      * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
      */
-    setCurrentScreenHTML(onGetHTML) {
+    setCurrentScreenHTML(forceRefresh, onSuccess, onError) {
         var self = this;        
-        this.backstack.getCurrent().initialise(this.isHeaderBackVisible(), onGetHTML, function (url) {
+        this.backstack.getCurrent().initialise("GET", null, this.isHeaderBackVisible(), forceRefresh, onSuccess, onError, function (url) {
             self.onGo(url, onGetHTML);
         }, function () {
             self.onBack(onGetHTML);
@@ -410,20 +397,6 @@ class Tab {
         });
     }
 
-    submitForm(action, method, data, onSuccess, onError) {
-        $.ajax({
-            url: action,
-            type: method.toUpperCase(),
-            data: data,
-            success: function(data) {
-                onSuccess(data, action);
-            },
-            error: function(data) {
-                onError(data);
-            }
-        });
-    }
-
     /**
      * onGo():
      * The user is going to another (forward) page - we need to push the new page onto the backstack.
@@ -431,9 +404,10 @@ class Tab {
      * @param {string} url - URL of the page to GO to.
      * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
      */
-    onGo(url, onGetHTML) {
+    onGo(url, onSuccess, onError) {
+        let self = this;
         if (this.backstack.push(new Screen(url))) {
-            this.setCurrentScreenHTML(onGetHTML);
+            self.setCurrentScreenHTML(true, onSuccess, onError);
         } else {
             console.error("onGo(): could not push screen with url '" + url + "' to the backstack.");
         }
@@ -446,9 +420,9 @@ class Tab {
      * 
      * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
      */
-    onBack(onGetHTML) {
+    onBack(onSuccess, onError) {
         if (this.backstack.pop()) {
-            this.setCurrentScreenHTML(onGetHTML);
+            this.setCurrentScreenHTML(false, onSuccess, onError);
         } else {
             /** Screen is the only one left in the backstack **/
             console.log("onBack(): did not pop Screen from backstack, though this could be because it's the last in stack. backstack length = " + this.backstack.screens.length);
@@ -465,10 +439,9 @@ class Tab {
     * @param {string} url - URL of the page to GO to.
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
-    onGoAndClear(url, onGetHTML) {
+    onGoAndClear(url, onSuccess, onError) {
         this.backstack.popForced();
-        this.backstack.push(new Screen(url));
-        this.setCurrentScreenHTML(onGetHTML);
+        this.onGo(url, onSuccess, onError);
     }
 
     /**
@@ -478,7 +451,18 @@ class Tab {
     */
     onSubmit(action, method, data, onSuccess, onError) {
         if (this.backstack.push(new Screen(action))) {
-            this.submitForm(action, method, data, onSuccess, onError);
+            var self = this;        
+            this.backstack.getCurrent().initialise(method, data, this.isHeaderBackVisible(), forceRefresh, onSuccess, onError, function (url) {
+                self.onGo(url, onGetHTML);
+            }, function () {
+                self.onBack(onGetHTML);
+            }, function (url) {
+                self.onGoAndClear(url, onGetHTML);
+            }, function (action, method, data, onFailure) {
+                self.onSubmit(action, method, data, onGetHTML, onFailure);
+            }, function () {
+                self.onRefresh(onGetHTML);
+            });
         } else {
             console.error("onSubmit(): could not push screen with url '" + url + "' to the backstack.");
         }
@@ -491,7 +475,7 @@ class Tab {
     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
     */
     onRefresh(onGetHTML) {
-        this.setCurrentScreenHTML(onGetHTML);
+        this.setCurrentScreenHTML(this.backstack.getCurrent().htmlCode, onGetHTML);
     }
 
     /**
