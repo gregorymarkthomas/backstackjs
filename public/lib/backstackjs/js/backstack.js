@@ -415,8 +415,6 @@ class Tab {
             url: action,
             type: method.toUpperCase(),
             data: data,
-            // processData: false,
-            // contentType: false,
             success: function(data) {
                 onSuccess(data, action);
             },
