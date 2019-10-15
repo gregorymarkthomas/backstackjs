@@ -26,7 +26,7 @@ class Screen {
     * @var {string} goTerm - the search term used to set onClick listeners on buttons that push a Screen onto the backstack.
     * @var {string} goBackTerm - the search term used to set onClick listeners on buttons that pop a Screen from the backstack.
     * @var {string} goAndClearTerm - the search term used to set onClick listeners on buttons that push a Screen onto the backstack but also pop the current one.
-    * @var {string} submitTerm - the search term used to set onClick listeners on form submission buttons. We stop tradition form submissions and instead rely on AJAX.
+    * @var {string} submitTerm - the search term used to set onClick listeners on form submission buttons. This ensures form submissions occur within backstack.
     * @var {string} refreshTerm - the search term used to set onClick listeners on 'refresh' buttons. We force the Screen to refresh on press of these buttons.
     */
     constructor(url) {
@@ -54,7 +54,7 @@ class Screen {
      * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
-     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form.
+     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
      * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
      */
     initialiseIgnoreCache(isBackVisible, onGetHTML, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
@@ -82,7 +82,7 @@ class Screen {
      * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
-     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form.
+     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
      * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
      */
     initialise(isBackVisible, onGetHTML, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
@@ -110,7 +110,7 @@ class Screen {
      * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
-     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form.
+     * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
      * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
      */
     setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
@@ -192,13 +192,13 @@ class Screen {
     setSubmitOverride(callback) {
         var self = this;
         $(this.submitTerm).submit(function (e) {
-            self.forceRefreshOnLoad = true;
+            self.destroy();
             callback(e.target.action, e.target.method, $(self.submitTerm).serializeArray(), function(data) {
                 console.error("setSubmitOverride(): onFailure: " + data.status + " " + data.statusText);
             });
             return false;
         });
-    }
+    }  
 
     /**
      * setRefreshOverride():
@@ -418,7 +418,7 @@ class Tab {
             // processData: false,
             // contentType: false,
             success: function(data) {
-                onSuccess();
+                onSuccess(data, action);
             },
             error: function(data) {
                 onError(data);
@@ -476,10 +476,14 @@ class Tab {
     /**
     * onSubmit():
     *
-    * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+    * @param {function} TODO
     */
     onSubmit(action, method, data, onSuccess, onError) {
-        this.submitForm(action, method, data, onSuccess, onError);
+        if (this.backstack.push(new Screen(action))) {
+            this.submitForm(action, method, data, onSuccess, onError);
+        } else {
+            console.error("onSubmit(): could not push screen with url '" + url + "' to the backstack.");
+        }
     }
 
     /**
