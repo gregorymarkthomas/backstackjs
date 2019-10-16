@@ -47,11 +47,13 @@ class Screen {
      * We also set the Screen onClick listeners here - whoever initialises the screen is told when Go, Back and Go+Clear buttons are pressed.
      *
      * On first visit of this Screen we of course GET the HTML. On other visits we used the cached version.
-     * If a form has been submitted on the Screen, then forceRefreshOnLoad is set to TRUE, so the page would be forced to GET HTML again.
-     * This is so the Screen shows the most recent data.
      *
+     * @param {string} method - defines the type of request to the url (i.e. GET, POST or PUT).
+     * @param {Array} data - an Array of JSON-like value/keys to represent input data (see jQuery's form serializeArray() method)
      * @param {boolean} isBackVisible - true if all Back buttons are visible (i.e. if there is a Screen to go back to).
-     * @param {function} onGetHTML - notifies caller when HTML has been generated for this Screen.
+     * @param {boolean} forceRefresh - even if this Screen's HTML is cached, this boolean will clear it and do another AJAX call.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      * @param {function} onGo - notifies caller when user has pressed a button to move forward a Screen.
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
@@ -64,7 +66,6 @@ class Screen {
             let self = this;
             this.getHtml(this.url, method, data, function(htmlCode, url) {
                 self.htmlCode = htmlCode;
-                // self.url vs url - different if getting url for form submission
                 onSuccess(htmlCode, url);
                 self.setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh);
             }, function(data, url) {
@@ -77,6 +78,16 @@ class Screen {
         }
     }
 
+    /**
+     * getHtml():
+     * The function to request data from an endpoint.
+     *
+     * @param {string} action - defines the type of request to the url (i.e. GET, POST or PUT).
+     * @param {string} method - defines the type of request to the url (i.e. GET, POST or PUT).
+     * @param {Array} data - an Array of JSON-like value/keys to represent input data (see jQuery's form serializeArray() method)
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
+    */
     getHtml(action, method, data, onSuccess, onError) {
         $.ajax({
             url: action,
@@ -125,7 +136,6 @@ class Screen {
     setGoOverride(callback) {
         var self = this;
         $(this.goTerm).click(function () {
-            console.log("setGoOverride(): onClick");
             self.destroy();
             callback(this.href);
             return false;
@@ -168,15 +178,9 @@ class Screen {
     /**
      * setSubmitOverride():
      * Adds an onClick listener to all form submission buttons.
-     * 
      * We want to stop the traditional form process of reloading the whole screen on submit - this is why we 'return false'.
-     * 
-     * On a form submission, data has probably changed. This override just tells the Screen to do a hard refresh when it is next loaded (instead of from cache).
-     * 
-     * We still callback to Tab to notify it that a submission has occurred.
-     * We DO NOT destroy().
-     * 
-     * serializeArray() will serialise both GET and POST data into an array.
+     * The entered action and target are taken from the <form> in the view. 
+     * serializeArray() will serialise both GET and POST data into an Array of JSON-like value/keys.
      * 
      * @param {function} callback - notifies caller button has been pressed.
     */
@@ -202,7 +206,6 @@ class Screen {
     setRefreshOverride(callback) {
         var self = this;
         $(this.refreshTerm).click(function () {
-            console.log("setRefreshOverride(): onClick");
             self.forceRefreshOnLoad = true;
             self.destroy();
             callback();
