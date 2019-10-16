@@ -22,7 +22,6 @@ class Screen {
     * @param {string} url - URL of the page this screen holds the HTML to.    
     *
     * @var {string} htmlCode - holds the HTML of the page this Screen represents.
-    * @var {boolean} forceRefreshOnLoad - is TRUE if we do not want to use the cached HTML. This is used when a form has been submitted on this Screen.
     * @var {string} goTerm - the search term used to set onClick listeners on buttons that push a Screen onto the backstack.
     * @var {string} goBackTerm - the search term used to set onClick listeners on buttons that pop a Screen from the backstack.
     * @var {string} goAndClearTerm - the search term used to set onClick listeners on buttons that push a Screen onto the backstack but also pop the current one.
@@ -32,7 +31,6 @@ class Screen {
     constructor(url) {
         this.url = url;
         this.htmlCode = null;
-        this.forceRefreshOnLoad = false;
         this.goTerm = ".bs-override-go";
         this.backTerm = ".bs-override-back";
         this.goAndClearTerm = ".bs-override-clear";
@@ -199,14 +197,11 @@ class Screen {
      * This will force the Screen to refresh itself.
      * This may be used on Profile screens where user decidesto DISCARD changes - we want to refresh view to revert old data.
      * 
-     * 'forceRefreshOnLoad' just tells the Screen to do a hard refresh when it is next loaded (instead of from cache).
-     * 
      * @param {function} callback - notifies caller button has been pressed.
     */
     setRefreshOverride(callback) {
         var self = this;
         $(this.refreshTerm).click(function () {
-            self.forceRefreshOnLoad = true;
             self.destroy();
             callback();
             return false;
