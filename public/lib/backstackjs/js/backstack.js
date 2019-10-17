@@ -324,10 +324,10 @@ class Backstack {
     }
 
     /**
-    * push():
-    * Adds a Screen from the top of the stack.
-    * 
-    * Returns true if the Screen is successfully pushed to the top of the backstack.
+     * push():
+     * Adds a Screen from the top of the stack.
+     * 
+     * Returns true if the Screen is successfully pushed to the top of the backstack.
     */
     push(screen) {
         return (this.screens.push(screen) ? true : false);
@@ -346,6 +346,7 @@ class Backstack {
 /**
  * Tab:
  * Represents the clickable outer Tab.
+ * Handles its own Backstack object.
  **/
 class Tab {
 
@@ -365,7 +366,8 @@ class Tab {
      * Sets OnClick listener for when user presses this Tab.
      * 
      * @param {function} preCreate - notifies caller that Screen is about to be created.
-     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      */
     onClick(preCreate, onSuccess, onError) {
         var self = this;
@@ -377,10 +379,15 @@ class Tab {
 
     /**
      * setCurrentScreenHTML():
-     * Get the HTML from the current Screen and show in the view container.
+     * Initialises the current page in this tab's Backstack.
      * Register callbacks from any backstack-related button clicks that occur on the current Screen.
+     * If, say, a back button is pressed, 'self.onBack()' is called, which will do it's own Backstack operation.
      * 
-     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+     * @param {string} method - defines the type of request to the url (i.e. GET, POST or PUT).
+     * @param {Array} data - an Array of JSON-like value/keys to represent input data (see jQuery's form serializeArray() method)
+     * @param {boolean} forceRefresh - even if this Screen's HTML is cached, this boolean will clear it and do another AJAX call.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      */
     setCurrentScreenHTML(method, data, forceRefresh, onSuccess, onError) {
         var self = this;        
@@ -402,7 +409,8 @@ class Tab {
      * The user is going to another (forward) page - we need to push the new page onto the backstack.
      * 
      * @param {string} url - URL of the page to GO to.
-     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      */
     onGo(url, onSuccess, onError) {
         let self = this;
@@ -418,7 +426,8 @@ class Tab {
      * The user is going back to a previous page - we need to pop the current page from the backstack.
      * Only refresh the view if there was a Screen to pop (i.e. wasn't the only Screen left in backstack).
      * 
-     * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      */
     onBack(onSuccess, onError) {
         if (this.backstack.pop()) {
@@ -430,14 +439,15 @@ class Tab {
     }
 
     /**
-    * onGoAndClear():
-    * The user is going 'sideways' to another page (i.e. they want to go to another page and they don't want an opportunity to come back).
-    * We need to pop the current page from the backstack and push the new page onto the backstack.
-    * backstack.popForced() is used only here so that if a Go + Clear button is used when there is only 1 screen, we want to pop the last screen.
-    * Normal pop() will always leave one screen left, but popForced() can leave zero screens left.
-    * 
-    * @param {string} url - URL of the page to GO to.
-    * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+     * onGoAndClear():
+     * The user is going 'sideways' to another page (i.e. they want to go to another page and they don't want an opportunity to come back).
+     * We need to pop the current page from the backstack and push the new page onto the backstack.
+     * backstack.popForced() is used only here so that if a Go + Clear button is used when there is only 1 screen, we want to pop the last screen.
+     * Normal pop() will always leave one screen left, but popForced() can leave zero screens left.
+     * 
+     * @param {string} url - URL of the page to GO to.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
     */
     onGoAndClear(url, onSuccess, onError) {
         this.backstack.popForced();
@@ -445,9 +455,17 @@ class Tab {
     }
 
     /**
-    * onSubmit():
-    *
-    * @param {function} TODO
+     * onSubmit():
+     * User is submitting a form.
+     * The result page (i.e. action) is pushed onto this Tab's Backstack as a new Screen.
+     * This allows the user to go back to the previous page within the Backstack.
+     *
+     * @param {string} action - defines the URL/target destination. This could be a PHP file which handles the results of the form.
+     * @param {string} method - defines the type of request to the url (i.e. GET, POST or PUT).
+     * @param {Array} data - an Array of JSON-like value/keys to represent input data (see jQuery's form serializeArray() method)
+     * @param {boolean} forceRefresh - even if this Screen's HTML is cached, this boolean will clear it and do another AJAX call.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
     */
     onSubmit(action, method, data, onSuccess, onError) {
         if (this.backstack.push(new Screen(action))) {
@@ -458,10 +476,11 @@ class Tab {
     }
 
     /**
-    * onRefresh():
-    * We want to refresh the current Screen so newly saved data or previous data prior to saving is now shown.
-    *
-    * @param {function} onGetHTML - notifies caller that Screen has generated the HTML.
+     * onRefresh():
+     * This function does a soft-refresh on the current Screen by reapplying the cached HTML onto the DOM.
+     *
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
     */
     onRefresh(onSuccess, onError) {
         this.setCurrentScreenHTML("GET", null, false, onSuccess, onError);
@@ -504,7 +523,8 @@ class TabBar {
      * @param {string} appViewId - view ID of container that will show the Screen HTML.
      * @param {string} selectedTabViewId - ID of the tab view that is selected first.
      * @param {string} transitionSpeed - speed that jQuery animation will operate at when Screens are changed.
-     * @param {function} onViewUpdated - callback that is called when new HTML has been applied to view container.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      */
     constructor(tabs, appViewId, selectedTabViewId, transitionSpeed, onSuccess, onError) {
         this.tabClassName = "btn-tab";
@@ -526,7 +546,8 @@ class TabBar {
      *  - This is to stop any conflicts of objects between the views.
      *  
      * @param {string} appViewId - view ID of container that will show the Screen HTML.
-     * @param {function} onViewUpdated - callback that is called when new HTML has been applied to view container.
+     * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
+     * @param {function} onError - notifies caller when error has occurred (like page not being found).
      */
     setTabsClickListeners(appViewId, onSuccess, onError) {
         var self = this;
@@ -551,6 +572,12 @@ class TabBar {
         });
     }
 
+    /**
+     * findTab():
+     * Finds Tab element within this TabBar.
+     *
+     * @param {string} tabViewId - view ID of the Tab to be found
+    */
     findTab(tabViewId) {
         let selectedTab = this.tabs.find(function (tab) {
             return tab.viewId == tabViewId
@@ -565,6 +592,8 @@ class TabBar {
     /**
      * clickTab():
      * Triggers a click on the specified tab.
+     *
+     * @param {string} tabViewId - view ID of the Tab to be clicked
      */
     clickTab(tabViewId) {
         $("#" + tabViewId).click();
@@ -574,7 +603,7 @@ class TabBar {
     * addSelectedViewClass():
     * Adds a new class to this Tab's view to change its visible state to 'selected'.
     * 
-    * @param {any} view - the selected view's ID or class.
+    * @param {string} view - the selected view's ID or class.
     */
     addSelectedViewClass(view) {
         $(view).addClass(this.tabSelectedClassName);
@@ -584,7 +613,7 @@ class TabBar {
      * removeSelectedViewClass():
      * Removes the 'selected' visible state class from this Tab's view to make it 'unselected'.
      * 
-     * @param {any} view
+     * @param {string} view - the selected view's ID or class.
      */
     removeSelectedViewClass(view) {
         $(view).removeClass(this.tabSelectedClassName);
@@ -594,11 +623,11 @@ class TabBar {
      * animateIn(): (WIP)
      * I hoped to use fadeIn/animate here but the animation is stopped mid-way through.
      * I had to settle for what is there below.
-     * @param {string} viewId
-     * @param {string/int} transitionSpeed
+     *
+     * @param {string} view - the selected view's ID or class.
+     * @param {string/int} transitionSpeed - animation transition speed (not currently used)
      */
     animateIn(viewId, transitionSpeed) {
-        console.log("animateIn(): starting");
         $(viewId).css("visibility", "visible");
     }
 
@@ -606,12 +635,12 @@ class TabBar {
      * animateOut(): (WIP)
      * I hoped to use fadeIn/animate here but the animation is stopped mid-way through.
      * I had to settle for what is there below.
-     * @param {string} viewId
-     * @param {string/int} transitionSpeed
-     * @param {function} onComplete
+     *
+     * @param {string} view - the selected view's ID or class.
+     * @param {string/int} transitionSpeed - animation transition speed (not currently used)
+     * @param {function} onComplete - notifies caller when animation has been successful.
      */
     animateOut(viewId, transitionSpeed, onComplete) {
-        console.log("animateOut(): starting");
         $(viewId).css("visibility", "hidden");
         onComplete();
     }
