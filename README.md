@@ -4,9 +4,10 @@ Javascript/jQuery library to provide a usable mobile-like user-experience for we
 Create a viewport and tabs in HTML, then apply classes to buttons within your pages to traverse the backstack within the tab.
 
 ### Features
-* Users can go forward and back between pages without reloading whole screen.
+* Users can go forward and back between pages without reloading the whole screen.
+* Tab state is saved between changing of tabs
+* Form submissions are supported. User can go back to previous page in backstack.
 * Mobile-like toolbar, content container and tabs.
-
 
 [An example resides here on my website](https://gregorymarkthomas.com/dev/backstackjs "See example of backstack.js on Gregory's website")
 
