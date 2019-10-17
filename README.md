@@ -12,15 +12,15 @@ Create a viewport and tabs in HTML, then apply classes to buttons within your pa
         <button class="bs-override-back"><</button>
     </nav>      
 ```
-4. Create a viewport for the dynamic content in `<html>` tags. `class="container"` is of your choosing.
+4. Create a viewport for the dynamic content in `<html>` tags. `class="container"` is of your choosing. 
 ```
-    <main id="main" class="container">
+    <main id="main" class="tabs-viewport container">
         <!-- dynamic content -->
     </main>
 ```
-4. Create some tabs:
+4. Create some tabs. `class="tabs"` is used to force this element to only use the space it needs (i.e. it does not 'flow').
 ```
-    <div>
+    <div class="tabs">
         <button id="tab-one">
             <div>Tab 1</div>
         </button>

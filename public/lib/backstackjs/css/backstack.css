@@ -15,23 +15,23 @@ body {
 }
 
 /**
-    nav:
+    .tabs-toolbar:
     Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
 */
-nav {
+.tabs-toolbar {
     flex-grow: 0;
 }
 
 /**
-    main:
-    'flex: 1' denotes 'flex-grow: 1', meaning 'main' will fill available space between #header and #footer.
-    We also enable flex for its children so that a child with 'flex-grow: 1' can fill available space within 'main'.
+    .tabs-viewport:
+    'flex: 1' denotes 'flex-grow: 1', meaning 'tabs-viewport' element will fill available space between .tabs-toolbar and .tabs.
+    We also enable flex for its children so that a child with 'flex-grow: 1' can fill available space within 'tabs-viewport'.
     'min-height: 0px' is required for Firefox/other webkit browsers
         - flex children (e.g. .scrollable) were not becoming scrollable when overflowing
         - "It turns out that there was a feature in the flexbox specification that added an implied minimum size for flex items. This feature was removed and then re-added back into the spec at some point."
         - See https://moduscreate.com/blog/how-to-fix-overflow-issues-in-css-flex-layouts/
 */
-main {
+.tabs-viewport {
     flex: 1;
     display: flex;
     flex-direction: column;
