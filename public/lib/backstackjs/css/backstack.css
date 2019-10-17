@@ -39,10 +39,11 @@ main {
 }
 
 /**
-    .footer:
+    .tabs:
+    The container for our Tabs.
     Does not flow and therefore does not fill available space - its size is that of its content (though 'flex-grow: 0' is set by default anyway)
 */
-footer {
+.tabs {
     flex: 0;
 }
 
