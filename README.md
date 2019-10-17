@@ -1,12 +1,18 @@
 # backstack.js
+### v1.0
 Javascript/jQuery library to provide a usable mobile-like user-experience for web.
 Create a viewport and tabs in HTML, then apply classes to buttons within your pages to traverse the backstack within the tab.
+
+### Features
+* Users can go forward and back between pages without reloading whole screen.
+* Mobile-like toolbar, content container and tabs.
+
 
 [An example resides here on my website](https://gregorymarkthomas.com/dev/backstackjs "See example of backstack.js on Gregory's website")
 
 ## Requirements
 * jQuery 3.4.1
-  Newer versions should work.
+   * Newer versions should work.
 * Javascript-enabled browser
 
 ## Instructions
@@ -61,7 +67,8 @@ Create a viewport and tabs in HTML, then apply classes to buttons within your pa
    </div>
    ```
 
-5. Create a new `<script>` block to instantiate backstack.js. Add your screens to each tab via the URLs. e.g:
+5. Create a new `<script>` block to instantiate backstack.js. Add your screens to each tab via the URLs.
+   * The HTML pages at the URLs are barebones (i.e. they complement the outer HTML's CSS).
 
     `<script>`
     ```javascript
