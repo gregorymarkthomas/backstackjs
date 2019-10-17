@@ -26,7 +26,8 @@ class Screen {
     * @var {string} goBackTerm - the search term used to set onClick listeners on buttons that pop a Screen from the backstack.
     * @var {string} goAndClearTerm - the search term used to set onClick listeners on buttons that push a Screen onto the backstack but also pop the current one.
     * @var {string} submitTerm - the search term used to set onClick listeners on form submission buttons. This ensures form submissions occur within backstack.
-    * @var {string} refreshTerm - the search term used to set onClick listeners on 'refresh' buttons. We force the Screen to refresh on press of these buttons.
+    * @var {string} refreshTerm - the search term used to set onClick listeners on 'refresh' buttons. We force a Screen refresh on press of these buttons.
+    * @var {string} reapplyTerm - the search term used to set onClick listeners on 'reapply' buttons. We reapply Screen's cached HTML on press of these buttons.
     */
     constructor(url) {
         this.url = url;
@@ -36,6 +37,7 @@ class Screen {
         this.goAndClearTerm = ".bs-override-clear";
         this.submitTerm = ".bs-override-submit";
         this.refreshTerm = ".bs-override-refresh";
+        this.reapplyTerm = ".bs-override-reapply";
     }
 
     /**
@@ -56,7 +58,7 @@ class Screen {
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
      * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
-     * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
+     * @param {function} onRefresh - notifies caller when user has pressed a button to refresh or reapply the Screen.
      */
     initialise(method, data, isBackVisible, forceRefresh, 
         onSuccess, onError, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
@@ -111,7 +113,7 @@ class Screen {
      * @param {function} onBack - notifies caller when user has pressed a button to move back a Screen.
      * @param {function} onGoAndClear - notifies caller when user has pressed a button to move forward a Screen but disallow ability to go back to previous Screen.
      * @param {function} onSubmit - notifies caller when user has pressed Submit on a form (traditional page-refresh way).
-     * @param {function} onRefresh - notifies caller when user has pressed a button to refresh the page.
+     * @param {function} onRefresh - notifies caller when user has pressed a button to refresh (either re-GET or reapply cached HTML) to refresh the Screen.
      */
     setupOverrides(isBackVisible, onGo, onBack, onGoAndClear, onSubmit, onRefresh) {
         var self = this;
@@ -120,7 +122,8 @@ class Screen {
         self.setBackOverride(onBack);
         self.setGoAndClearOverride(onGoAndClear);
         self.setSubmitOverride(onSubmit);
-        self.setRefreshOverride(onRefresh);                       
+        self.setRefreshOverride(onRefresh);
+        self.setReapplyOverride(onRefresh);
     }
 
     /**
@@ -194,7 +197,7 @@ class Screen {
     /**
      * setRefreshOverride():
      * Adds an onClick listener to all buttons with this term.
-     * This will force the Screen to refresh itself.
+     * This will force the Screen to refresh itself by doing another GET on the url of the Screen (forceRefresh is true).
      * This may be used on Profile screens where user decidesto DISCARD changes - we want to refresh view to revert old data.
      * 
      * @param {function} callback - notifies caller button has been pressed.
@@ -203,7 +206,23 @@ class Screen {
         var self = this;
         $(this.refreshTerm).click(function () {
             self.destroy();
-            callback();
+            callback(true);
+            return false;
+        });
+    }
+
+    /**
+     * setReapplyOverride():
+     * Adds an onClick listener to all buttons with this term.
+     * This will force the Screen to reapply the current cached HTML, ignoring any dynamic changes from the backend (forceRefresh is false)
+     * 
+     * @param {function} callback - notifies caller button has been pressed.
+    */
+    setReapplyOverride(callback) {
+        var self = this;
+        $(this.reapplyTerm).click(function () {
+            self.destroy();
+            callback(false);
             return false;
         });
     }
@@ -226,7 +245,7 @@ class Screen {
     /**
      * clearGoOverride():
      * Removes onClick listener.
-     */
+    */
     clearGoOverride() {
         $(this.goTerm).off("click");
     }
@@ -234,7 +253,7 @@ class Screen {
     /**
      * clearBackOverride():
      * Removes onClick listener.
-     */
+    */
     clearBackOverride() {
         $(this.backTerm).off("click");
     }
@@ -242,25 +261,33 @@ class Screen {
     /**
      * clearGoAndClearOverride():
      * Removes onClick listener.
-     */
+    */
     clearGoAndClearOverride() {
         $(this.goAndClearTerm).off("click");
     }
 
     /**
-    * clearSubmitOverride():
-    * Removes onClick listener.
+     * clearSubmitOverride():
+     * Removes onClick listener.
     */
     clearSubmitOverride() {
         $(this.submitTerm).off("submit");
     }
 
     /**
-    * clearRefreshOverride():
-    * Removes onClick listener.
+     * clearRefreshOverride():
+     * Removes onClick listener.
     */
     clearRefreshOverride() {
         $(this.refreshTerm).off("click");
+    }
+
+    /**
+     * clearRefreshOverride():
+     * Removes onClick listener.
+    */
+    clearReapplyOverride() {
+        $(this.reapplyTerm).off("click");
     }
 
     /**
@@ -274,6 +301,7 @@ class Screen {
         this.clearGoAndClearOverride();
         this.clearSubmitOverride();
         this.clearRefreshOverride();
+        this.clearReapplyOverride();
     }
 }
 
@@ -399,8 +427,8 @@ class Tab {
             self.onGoAndClear(url, onSuccess, onError);
         }, function (action, method, data) {
             self.onSubmit(action, method, data, onSuccess, onError);
-        }, function () {
-            self.onRefresh(onSuccess, onError);
+        }, function (forceRefresh) {
+            self.onRefresh(forceRefresh, onSuccess, onError);
         });
     }
 
@@ -479,11 +507,12 @@ class Tab {
      * onRefresh():
      * This function does a soft-refresh on the current Screen by reapplying the cached HTML onto the DOM.
      *
+     * @param {boolean} forceRefresh - even if this Screen's HTML is cached, this boolean will clear it and do another AJAX call.
      * @param {function} onSuccess - notifies caller when HTML has successfully been generated for this Screen.
      * @param {function} onError - notifies caller when error has occurred (like page not being found).
     */
-    onRefresh(onSuccess, onError) {
-        this.setCurrentScreenHTML("GET", null, false, onSuccess, onError);
+    onRefresh(forceRefresh, onSuccess, onError) {
+        this.setCurrentScreenHTML("GET", null, forceRefresh, onSuccess, onError);
     }
 
     /**
