@@ -1,7 +1,7 @@
 # backstack.js
 ### v1.0
 Javascript/jQuery library to provide a usable mobile-like user-experience for web.
-Create a viewport and tabs in HTML, then apply classes to buttons within your pages to traverse the backstack within the tab.
+Create x number of tabs with their own backstacks of pages to allow users to navigate your web app in a mobile-app-like manner.
 
 ### Features
 * Users can go forward and back between pages without reloading the whole screen.
@@ -9,11 +9,14 @@ Create a viewport and tabs in HTML, then apply classes to buttons within your pa
 * Form submissions are supported. User can go back to previous page in backstack.
 * Mobile-like toolbar, content container and tabs.
 
-[An example resides here on my website](https://gregorymarkthomas.com/dev/backstackjs "See example of backstack.js on Gregory's website")
+### How it works
+backstack.js intercepts various button clicks. After defining your tabs and initial screens, the backstack for each tab is managed when the user clicks on buttons that use `"bs-override-"` classes. For example, a `"bs-override-back"` button will `pop()` the current screen from the current tab's backstack.
+
+[An example resides on my website](https://gregorymarkthomas.com/dev/backstackjs "See example of backstack.js on Gregory's website")
 
 ## Requirements
 * jQuery 3.4.1
-   * Newer versions should work.
+   * Other versions should work due to little reliance on this library, but these have not been tested.
 * Javascript-enabled browser
 
 ## Instructions
@@ -30,8 +33,8 @@ Create a viewport and tabs in HTML, then apply classes to buttons within your pa
    `<script src="lib/backstackjs/js/backstack.js" type="text/javascript"></script>`
 
 4. Create (optional) `<nav>` element. 
-   * `tabs-toolbar` forces this element to only use the space it needs. 
-   * `container`'s properties' is of your choosing. 
+   * `tabs-toolbar` forces this element to only use the space it needs
+   * `container`'s CSS entry is of your choosing
    * `<button>` with class `"bs-override-back"` is a backstack.js-compatible back button
 
    ```
@@ -41,7 +44,7 @@ Create a viewport and tabs in HTML, then apply classes to buttons within your pa
    ```
 
 5. Create a viewport for the dynamic content in `<html>` tags. 
-   * `container`'s properties is of your choosing. 
+   * `container`'s CSS entry is of your choosing. 
    * `id="main"` will be used to instantiate the Backstack; backstack.js will inject the dynamic HTML into this element.
    
    ```
